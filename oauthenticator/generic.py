@@ -134,6 +134,7 @@ class GenericOAuthenticator(OAuthenticator):
         access_token = token_response['access_token']
         refresh_token = token_response.get('refresh_token', None)
         scope = token_response.get('scope', '')
+        expires_in = token_response.get('expires_in', 0)
         id_token = token_response.get('id_token', None)
         if isinstance(scope, str):
             scope = scope.split(' ')
@@ -143,6 +144,7 @@ class GenericOAuthenticator(OAuthenticator):
             'refresh_token': refresh_token,
             'oauth_user': user_data_response,
             'scope': scope,
+            'expires_in': expires_in,
             'id_token': id_token,
         }
 
@@ -182,7 +184,8 @@ class GenericOAuthenticator(OAuthenticator):
             'name': name,
             'auth_state': self._create_auth_state(token_resp_json, user_data_resp_json),
         }
-
+        if user_info['auth_state']['expires_in']:
+            self.auth_refresh_age = user_info['auth_state']['expires_in']
         if self.allowed_groups:
             self.log.info(
                 'Validating if user claim groups match any of {}'.format(
@@ -211,6 +214,9 @@ class GenericOAuthenticator(OAuthenticator):
                 user_info = None
 
         return user_info
+
+    async def refresh_user(self, user, handler=None):
+        return False
 
 
 class LocalGenericOAuthenticator(LocalAuthenticator, GenericOAuthenticator):
