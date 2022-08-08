@@ -213,6 +213,9 @@ class GenericOAuthenticator(OAuthenticator):
 
         return user_info
 
+    async def refresh_user(self, user, handler=None):
+        return False
+
 
 class LocalGenericOAuthenticator(LocalAuthenticator, GenericOAuthenticator):
     """A version that mixes in local system user creation"""
